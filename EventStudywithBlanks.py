@@ -387,9 +387,9 @@ class eventstudy:
         print("Done for " + company_name)
 
 
-datafile = 'testfile.csv'  # data file
-directory = '/home/shreyans/Documents/eventstudy/test'  # data directory
-anouncement_dates_company = 'anouncement_dates.csv'  # list of companies and their announcement date
+datafile = ''  # data file
+directory = ''  # data directory
+anouncement_dates_company = ''  # list of companies and their announcement date
 data = pandas.read_csv(os.path.join(directory, datafile), delimiter=",")  # reading data from datafile
 company_data = pandas.read_csv(os.path.join(directory, anouncement_dates_company),
                                delimiter=",")  # reading data about companies and their anouncement
