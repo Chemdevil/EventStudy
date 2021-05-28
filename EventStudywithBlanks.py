@@ -122,7 +122,7 @@ class eventstudy:
                 t3.split(" "), t4.split(" "),
                 t5.split(" "), t6.split(" "), t7.split(" ")]
 
-        with open(filename, 'w') as csvfile:
+        with open(filename, 'w',newline='') as csvfile:
             # creating a csv writer object
             csvwriter = csv.writer(csvfile)
 
@@ -134,11 +134,13 @@ class eventstudy:
 
     @staticmethod
     # for generating the combined file
-    def cummulative_file_generator(date_100, estimation_return_mean_100, file_cummulative):
+    def cummulative_file_generator(date_100, estimation_return_mean_100, file_cummulative,start_date,demo_number):
         if company_number == 0:
-            with open(os.path.join(directory, file_cummulative), 'w') as csvfile:
+            with open(os.path.join(directory, file_cummulative), 'w', newline='') as csvfile:
                 csvwriter = csv.writer(csvfile)
                 csvwriter.writerow(["days", company_name])
+                csvwriter.writerow(["Announcement date",start_date])
+                csvwriter.writerow(["Demo Number",demo_number])
                 for i in range(len(date_100)):
                     csvwriter.writerow([date_100[i], estimation_return_mean_100[i]])
         elif company_number > 0:
@@ -150,16 +152,20 @@ class eventstudy:
             for i in range(len(k)):
                 if i == 0:
                     k[i].append(company_name)
+                elif i == 1:
+                    k[i].append(start_date)
+                elif i==2:
+                    k[i].append(demo_number)
                 else:
-                    k[i].append(estimation_return_mean_100[i - 1])
-            with open(os.path.join(directory, file_cummulative), 'w') as csvfile:
+                    k[i].append(estimation_return_mean_100[i - 3])
+            with open(os.path.join(directory, file_cummulative), 'w', newline='') as csvfile:
                 csvwriter = csv.writer(csvfile)
                 csvwriter.writerows(k)
 
     @staticmethod
     # for generating mean adjusted model
     def mean_adjusted_model(bse, infotech, bse_40, infotech_40, date_100, dates_40, days_100, days_40
-                            , infotech_mean_adjusted_model):
+                            , infotech_mean_adjusted_model,start_date,demo_number):
         estimation_mean = statistics.mean(infotech_mean_adjusted_model)  # mean calculation for mean adjusted model
         estimation_return_mean_100 = []
         estimation_return_mean_100_stdev = []
@@ -181,46 +187,46 @@ class eventstudy:
         stadard_mean_adjusted_dev_100 = statistics.stdev(
             estimation_return_mean_100_stdev)  # standard deviation of 100 estimated return mean
 
-        file_1001 = "Blank-Estimations-Mean-adjusted-model" + "".join(companies_name) + ".csv"
-        with open(os.path.join(directory, file_1001), '+a') as csvfile:
+        file_1001 = "Blank-Estimations-Mean-adjusted-model"  + ".csv"
+        with open(os.path.join(directory, file_1001), '+a', newline='') as csvfile:
             csvwriter = csv.writer(csvfile)
             csvwriter.writerow([company_name])
-            csvwriter.writerow(["Date", "BSE", company_name, "Predicted return", "Estimated returns"])
+            csvwriter.writerow(["Date", "BSE", company_name+" "+start_date, "Predicted return", "Estimated returns"])
             for i in range(len(bse)):
                 csvwriter.writerow(
                     [str(days_100[i]), str(bse[i]), str(infotech[i]), str(estimation_mean),
                      str(estimation_return_mean_100[i])])
-            csvwriter.writerow(["standard deviation " + company_name + ":", stadard_mean_adjusted_dev_100])
+            csvwriter.writerow(["standard deviation " + company_name+" "+start_date + ":", stadard_mean_adjusted_dev_100])
             csvwriter.writerow("\n")
             csvwriter.writerow("\n")
             csvwriter.writerow("\n")
 
-        file_40 = "Blank-mean-adjusted-model[40]" + "".join(companies_name) + ".csv"
-        with open(os.path.join(directory, file_40), '+a') as csvfile:
+        file_40 = "Blank-mean-adjusted-model[40]"+ ".csv"
+        with open(os.path.join(directory, file_40), '+a', newline='') as csvfile:
             csvwriter = csv.writer(csvfile)
             csvwriter.writerow([company_name])
-            csvwriter.writerow(["Date", "BSE", company_name, "Predicted return", "Abnormal Return", "Days"])
+            csvwriter.writerow(["Date", "BSE", company_name+""+start_date, "Predicted return", "Abnormal Return", "Days"])
             for i in range(len(bse_40)):
                 csvwriter.writerow(
                     [str(days_40[i]), str(bse_40[i]), str(infotech_40[i]), str(estimation_mean),
                      str(actual_return_mean_40[i]),
                      str(dates_40[i])])
 
-            csvwriter.writerow(["standard deviation " + company_name + ":", stadard_mean_adjusted_dev_100])
+            csvwriter.writerow(["standard deviation " + company_name+" "+start_date + ":", stadard_mean_adjusted_dev_100])
             csvwriter.writerow("\n")
             csvwriter.writerow("\n")
             csvwriter.writerow("\n")
 
-        file_cummulative = "Blank-mean-adjusted-model-cumulative" + "".join(companies_name) + ".csv"
-        file_cummulative_40 = "Blank-mean-adjusted-model_cumulative_40" + "".join(companies_name) + ".csv"
+        file_cummulative = "Blank-mean-adjusted-model-cumulative" + ".csv"
+        file_cummulative_40 = "Blank-mean-adjusted-model_cumulative_40" + ".csv"
 
-        eventstudy.cummulative_file_generator(date_100, estimation_return_mean_100, file_cummulative)
-        eventstudy.cummulative_file_generator(dates_40, actual_return_mean_40, file_cummulative_40)
+        eventstudy.cummulative_file_generator(date_100, estimation_return_mean_100, file_cummulative,start_date,demo_number)
+        eventstudy.cummulative_file_generator(dates_40, actual_return_mean_40, file_cummulative_40,start_date,demo_number)
 
     @staticmethod
     # for generating market model
     def market_model(bse, infotech, bse_40, infotech_40, date_100, dates_40, days_100, days_40, infotech_market_model
-                     , bse_market_model):
+                     , bse_market_model,start_date,demo_number):
         beta = linregress(bse_market_model, infotech_market_model)[0]  # beta value
         alpha = linregress(bse_market_model, infotech_market_model)[1]  # alpha value
         predicted_return = []
@@ -245,11 +251,11 @@ class eventstudy:
             elif infotech_40[i] == " ":
                 abnormal_return_40.append(" ")
 
-        file_100 = "blank-Estimations-Market-Model" + "".join(companies_name) + ".csv"
-        with open(os.path.join(directory, file_100), '+a') as csvfile:
+        file_100 = "blank-Estimations-Market-Model" + ".csv"
+        with open(os.path.join(directory, file_100), '+a', newline='') as csvfile:
             csvwriter = csv.writer(csvfile)
             csvwriter.writerow([company_name])
-            csvwriter.writerow(["Date", "BSE", company_name, "Expected return", "Abnormal return"])
+            csvwriter.writerow(["Date", "BSE", company_name+" "+start_date, "Expected return", "Abnormal return"])
             for i in range(len(bse)):
                 csvwriter.writerow(
                     [str(days_100[i]), str(bse[i]), str(infotech[i]), str(expected_return[i]), str(abnormal_return[i])])
@@ -258,28 +264,28 @@ class eventstudy:
             csvwriter.writerow("\n")
             csvwriter.writerow("\n")
         #
-        file_40 = "blank-market-model[40]" + "".join(companies_name) + ".csv"
-        with open(os.path.join(directory, file_40), '+a') as csvfile:
+        file_40 = "blank-market-model[40]" + ".csv"
+        with open(os.path.join(directory, file_40), '+a', newline='') as csvfile:
             csvwriter = csv.writer(csvfile)
-            csvwriter.writerow(["Date", "BSE", company_name, "Predicted return", "AR", "Days"])
+            csvwriter.writerow(["Date", "BSE", company_name+" "+start_date, "Predicted return", "AR", "Days"])
             for i in range(len(bse_40)):
                 csvwriter.writerow(
                     [str(days_40[i]), str(bse_40[i]), str(infotech_40[i]), str(predicted_return[i]),
                      str(abnormal_return_40[i]),
                      str(dates_40[i])])
-            csvwriter.writerow(["alpha " + company_name + ":", alpha])
-            csvwriter.writerow(["beta " + company_name + ":", beta])
-            csvwriter.writerow(["standard deviation " + company_name, stadard_dev_100])
+            csvwriter.writerow(["alpha " + company_name +" "+start_date+ ":", alpha])
+            csvwriter.writerow(["beta " + company_name + " "+start_date+":", beta])
+            csvwriter.writerow(["standard deviation " + company_name+" "+start_date, stadard_dev_100])
 
-        file_cummulative = "Blank-Market-model-cumulative" + "".join(companies_name) + ".csv"
-        file_cummulative_40 = "Blank-Market-model-cumulative-_40" + "".join(companies_name) + ".csv"
+        file_cummulative = "Blank-Market-model-cumulative"  + ".csv"
+        file_cummulative_40 = "Blank-Market-model-cumulative-_40"  + ".csv"
 
-        eventstudy.cummulative_file_generator(date_100, abnormal_return, file_cummulative)
-        eventstudy.cummulative_file_generator(dates_40, abnormal_return_40, file_cummulative_40)
+        eventstudy.cummulative_file_generator(date_100, abnormal_return, file_cummulative,start_date,demo_number)
+        eventstudy.cummulative_file_generator(dates_40, abnormal_return_40, file_cummulative_40,start_date,demo_number)
 
     @staticmethod
     # for generating market adjusted model
-    def market_adjusted_model(bse, infotech, bse_40, infotech_40, date_100, dates_40, days_100, days_40):
+    def market_adjusted_model(bse, infotech, bse_40, infotech_40, date_100, dates_40, days_100, days_40,start_date,demo_number):
         mean_bse_100 = statistics.mean(bse)  # mean calculation for market adjusted model
         estimation_period_return = []
         estimation_period_return_stdev = []
@@ -297,41 +303,40 @@ class eventstudy:
                 actual_return_mean_40_mam.append(infotech_40[i] - mean_bse_100)
             else:
                 actual_return_mean_40_mam.append(" ")
-        file_1001 = "Blank-Estimations-Market-adjusted-model" + "".join(companies_name) + ".csv"
-        with open(os.path.join(directory, file_1001), '+a') as csvfile:
+        file_1001 = "Blank-Estimations-Market-adjusted-model" +".csv"
+        with open(os.path.join(directory, file_1001), '+a', newline='') as csvfile:
             csvwriter = csv.writer(csvfile)
             csvwriter.writerow([company_name])
-            csvwriter.writerow(["Date", "BSE", company_name, "Predicted return", "Estimated returns"])
+            csvwriter.writerow(["Date", "BSE", company_name+" "+start_date, "Predicted return", "Estimated returns"])
             for i in range(len(bse)):
                 csvwriter.writerow(
                     [str(days_100[i]), str(bse[i]), str(infotech[i]), str(mean_bse_100),
                      str(estimation_period_return[i])])
-            csvwriter.writerow(["standard deviation " + company_name + ":", stadard_dev_market_adjusted_model])
+            csvwriter.writerow(["standard deviation " + company_name+" "+start_date + ":", stadard_dev_market_adjusted_model])
             csvwriter.writerow("\n\n\n")
 
-        file_40 = "Blank-Market-adjusted-model_[40]" + "".join(companies_name) + ".csv"
-        with open(os.path.join(directory, file_40), '+a') as csvfile:
+        file_40 = "Blank-Market-adjusted-model_[40]"  + ".csv"
+        with open(os.path.join(directory, file_40), '+a', newline='') as csvfile:
             csvwriter = csv.writer(csvfile)
-            csvwriter.writerow(["Date", "BSE", company_name, "Predicted return", "Abnormal Return", "Days"])
+            csvwriter.writerow(["Date", "BSE", company_name+" "+start_date, "Predicted return", "Abnormal Return", "Days"])
             for i in range(len(bse_40)):
                 csvwriter.writerow(
                     [str(days_40[i]), str(bse_40[i]), str(infotech_40[i]), str(mean_bse_100),
                      str(actual_return_mean_40_mam[i]),
                      str(dates_40[i])])
 
-            csvwriter.writerow(["standard deviation " + company_name + ":", stadard_dev_market_adjusted_model])
+            csvwriter.writerow(["standard deviation " + company_name+" "+start_date + ":", stadard_dev_market_adjusted_model])
             csvwriter.writerow("\n\n\n")
 
-        file_cummulative = "Blank-Market-adjusted-model-cumulative_" + "".join(companies_name) + ".csv"
-        file_cummulative_40 = "Blank-Market-adjusted-model-cumulative_40" + "".join(companies_name) + ".csv"
-        eventstudy.cummulative_file_generator(date_100, estimation_period_return, file_cummulative)
-        eventstudy.cummulative_file_generator(dates_40, actual_return_mean_40_mam, file_cummulative_40)
+        file_cummulative = "Blank-Market-adjusted-model-cumulative_"  + ".csv"
+        file_cummulative_40 = "Blank-Market-adjusted-model-cumulative_40" + ".csv"
+        eventstudy.cummulative_file_generator(date_100, estimation_period_return, file_cummulative,start_date,demo_number)
+        eventstudy.cummulative_file_generator(dates_40, actual_return_mean_40_mam, file_cummulative_40,start_date,demo_number)
 
     @staticmethod
     # Calling function
-    def extractor_function(start_date, company_name):
+    def extractor_function(start_date, company_name,demo_number):
         date = data['Date'].tolist()[1:].index(start_date)  # finding the index of date
-        print()
         for i in range(date - eventstudy.ranges - eventstudy.examine + 1,
                        date - eventstudy.examine + 1):  # for converting string data to float for the -121 to -21 date
 
@@ -363,15 +368,15 @@ class eventstudy:
 
         eventstudy.market_adjusted_model(eventstudy.bse, eventstudy.infotech, eventstudy.bse_40
                                          , eventstudy.infotech_40, eventstudy.date_100, eventstudy.dates_40,
-                                         eventstudy.days_100, eventstudy.days_40)
+                                         eventstudy.days_100, eventstudy.days_40,start_date,demo_number)
 
         eventstudy.market_model(eventstudy.bse, eventstudy.infotech, eventstudy.bse_40
                                 , eventstudy.infotech_40, eventstudy.date_100, eventstudy.dates_40, eventstudy.days_100,
-                                eventstudy.days_40, eventstudy.bse_market_model, eventstudy.infotech_market_model)
+                                eventstudy.days_40, eventstudy.bse_market_model, eventstudy.infotech_market_model,start_date,demo_number)
 
         eventstudy.mean_adjusted_model(eventstudy.bse, eventstudy.infotech, eventstudy.bse_40
                                        , eventstudy.infotech_40, eventstudy.date_100, eventstudy.dates_40,
-                                       eventstudy.days_100, eventstudy.days_40, eventstudy.infotech_mean_adjusted_model)
+                                       eventstudy.days_100, eventstudy.days_40, eventstudy.infotech_mean_adjusted_model,start_date,demo_number)
 
         eventstudy.bse = []
         eventstudy.infotech = []
@@ -388,34 +393,32 @@ class eventstudy:
 
 
 datafile = ''  # data file
-directory = ''  # data directory
+directory = r''  # data directory
 anouncement_dates_company = ''  # list of companies and their announcement date
 data = pandas.read_csv(os.path.join(directory, datafile), delimiter=",")  # reading data from datafile
 company_data = pandas.read_csv(os.path.join(directory, anouncement_dates_company),
                                delimiter=",")  # reading data about companies and their anouncement
-companies_name = list(company_data["Company Name"])  # list for company name
-anouncement_dates = list(company_data["Ann date"])  # list for company anouncement date
+companies_name = list(company_data[""])  # list for company name
+anouncement_dates = list(company_data[""])  # list for company anouncement date
+demo=list(company_data[""])  # list for company Demo date
 
 event = eventstudy()  # object for eventstudy class
 
 for company_number in range(len(companies_name)):  # running for each company
     company_name = companies_name[company_number]  # for company
     temp = anouncement_dates[company_number]  # for company anouncement date
-    if list(data['Date']).__contains__(temp):  # check for date if exist then good otherwise check for 2 days back
-        date = data['Date'].tolist()[1:].index(temp)
-        if (data[company_name].tolist()[date + 1] != " "):
-            event.extractor_function(temp, company_name)
-        elif (data[company_name].tolist()[date + 1] == " "):
-            temp1 = event.date_reducer(temp)
-            if list(data['Date']).__contains__(temp1):
-                date = data['Date'].tolist()[1:].index(temp1)
-                if (data[company_name].tolist()[date + 1] != " "):
-                    event.extractor_function(temp1, company_name)
-                elif (data[company_name].tolist()[date + 1] == " "):
-                    temp2 = date_reducer(temp1)
-                    if list(data['Date']).__contains__(temp2):
-                        date = data['Date'].tolist()[1:].index(temp2)
-                        if (data[company_name].tolist()[date + 1] != " "):
-                            event.extractor_function(temp2, company_name)
-                        else:
-                            print("Can't do for" + company_name)
+    demo_number=demo[company_number]
+    temp1=event.date_reducer(temp)
+    temp2=event.date_reducer(temp1)
+    if temp in list(data['Date']):
+        if data['Date'].tolist()[1:].index(temp)!=" ":
+            date=data['Date'].tolist()[1:].index(temp)
+            event.extractor_function(temp, company_name, demo_number)
+    elif temp1 in list(data['Date']):
+        date=data['Date'].tolist()[1:].index(temp1)
+        event.extractor_function(temp1, company_name, demo_number)
+    elif temp2 in list(data['Date']):
+        date=data['Date'].tolist()[1:].index(temp2)
+        event.extractor_function(temp2, company_name, demo_number)
+    else:
+        print("Can't do for" + company_name)
