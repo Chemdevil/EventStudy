@@ -135,7 +135,7 @@ class eventstudy:
     @staticmethod
     # for generating the combined file
     def cummulative_file_generator(date_100, estimation_return_mean_100, file_cummulative,start_date,demo_number):
-        if company_number == 0:
+        if company_number == 0 or os.path.exists(os.path.join(directory, file_cummulative))==False:
             with open(os.path.join(directory, file_cummulative), 'w', newline='') as csvfile:
                 csvwriter = csv.writer(csvfile)
                 csvwriter.writerow(["days", company_name])
@@ -166,6 +166,9 @@ class eventstudy:
     # for generating mean adjusted model
     def mean_adjusted_model(bse, infotech, bse_40, infotech_40, date_100, dates_40, days_100, days_40
                             , infotech_mean_adjusted_model,start_date,demo_number):
+        if len(infotech_mean_adjusted_model)==infotech_mean_adjusted_model.count(" "):
+            print("Cannot Compute Mean Adjusted Model for ",company_name,"due to blank Data")
+            return
         estimation_mean = statistics.mean(infotech_mean_adjusted_model)  # mean calculation for mean adjusted model
         estimation_return_mean_100 = []
         estimation_return_mean_100_stdev = []
@@ -227,6 +230,9 @@ class eventstudy:
     # for generating market model
     def market_model(bse, infotech, bse_40, infotech_40, date_100, dates_40, days_100, days_40, infotech_market_model
                      , bse_market_model,start_date,demo_number):
+        if len(bse_market_model)==bse_market_model.count(" "):
+            print("Cannot compute Market Model for ",company_name,"due to blank data")
+            return
         beta = linregress(bse_market_model, infotech_market_model)[0]  # beta value
         alpha = linregress(bse_market_model, infotech_market_model)[1]  # alpha value
         predicted_return = []
@@ -295,6 +301,9 @@ class eventstudy:
                 estimation_period_return_stdev.append(infotech[i] - mean_bse_100)
             elif infotech[i] == " ":
                 estimation_period_return.append(" ")
+        if (len(estimation_period_return_stdev)==estimation_period_return_stdev.count(' ')):
+            print("Cannot compute Market Adjusted model for ",company_name,"due to blank data")
+            return
         stadard_dev_market_adjusted_model = statistics.stdev(
             estimation_period_return_stdev)  # standard deviation for estimated return
         actual_return_mean_40_mam = []
@@ -392,20 +401,23 @@ class eventstudy:
         print("Done for " + company_name)
 
 
-datafile = ''  # data file
-directory = r''  # data directory
-anouncement_dates_company = ''  # list of companies and their announcement date
+datafile = 'testfile.csv'  # data file
+directory = r'C:\Users\shrey\Desktop\event'  # data directory
+anouncement_dates_company = 'anouncement_dates.csv'  # list of companies and their announcement date
 data = pandas.read_csv(os.path.join(directory, datafile), delimiter=",")  # reading data from datafile
 company_data = pandas.read_csv(os.path.join(directory, anouncement_dates_company),
                                delimiter=",")  # reading data about companies and their anouncement
-companies_name = list(company_data[""])  # list for company name
-anouncement_dates = list(company_data[""])  # list for company anouncement date
-demo=list(company_data[""])  # list for company Demo date
+companies_name = list(company_data["Company Name"])  # list for company name
+anouncement_dates = list(company_data["Ann date"])  # list for company anouncement date
+demo=list(company_data["Deal number"])  # list for company Demo date
 
 event = eventstudy()  # object for eventstudy class
 
 for company_number in range(len(companies_name)):  # running for each company
     company_name = companies_name[company_number]  # for company
+    if not data.columns.tolist().__contains__(company_name):
+        print('Company name',company_name, 'not in',datafile)
+        continue
     temp = anouncement_dates[company_number]  # for company anouncement date
     demo_number=demo[company_number]
     temp1=event.date_reducer(temp)
