@@ -162,6 +162,9 @@ class eventstudy:
     @staticmethod
     # for generating mean adjusted model
     def mean_adjusted_model(bse, infotech, bse_40, infotech_40, date_100, dates_40, days_100, days_40,start_date,demo_number):
+        if len(infotech) == infotech.count(" "):
+            print("Cannot Compute Mean Adjusted Model for ", company_name, "due to blank Data")
+            return
         estimation_mean = statistics.mean(infotech)  # mean caluclation for mean adjusted model
         estimation_return_mean_100 = []
         actual_return_mean_40 = []
@@ -218,6 +221,9 @@ class eventstudy:
     @staticmethod
     # for generating market model
     def market_model(bse, infotech, bse_40, infotech_40, date_100, dates_40, days_100, days_40,start_date,demo_number):
+        if len(bse)==bse.count(" "):
+            print("Cannot compute Market Model for ",company_name,"due to blank data")
+            return
         beta = linregress(bse, infotech)[0]  # beta value
         alpha = linregress(bse, infotech)[1]  # alpha value
         predicted_return = []
@@ -279,6 +285,9 @@ class eventstudy:
         estimation_period_return = []
         for i in range(len(infotech)):  # estimation period return for 100 days
             estimation_period_return.append(infotech[i] - mean_bse_100)
+        if (len(estimation_period_return)==estimation_period_return.count(' ')):
+            print(" Cannot compute Market Adjusted model for ",company_name,"due to blank data")
+            return 0
         stadard_dev_market_adjusted_model = statistics.stdev(
             estimation_period_return)  # standard deviation for estimated return
         actual_return_mean_40_mam = []
@@ -325,7 +334,6 @@ class eventstudy:
     # Calling function
     def extractor_function(start_date, company_name,demo_number):
         date = data['Date'].tolist()[1:].index(start_date)  # finding the index of date
-
         for i in range(date - eventstudy.ranges - eventstudy.examine +1,
                        date - eventstudy.examine +1):  # for converting string data to float for the -121 to -21 date
             eventstudy.bse.append(float(data['bse'].tolist()[i]))
@@ -371,18 +379,21 @@ class eventstudy:
 
 
 datafile = 'testfile.csv'  # data file
-directory = ""
+directory = r'C:\Users\shrey\Desktop\event'
 # data directory
-anouncement_dates_company = ''  # list of companies and their announcement date
+anouncement_dates_company = 'anouncement_dates.csv'  # list of companies and their announcement date
 data = pandas.read_csv(os.path.join(directory, datafile), delimiter=",")  # reading data from datafile
 company_data = pandas.read_csv(os.path.join(directory, anouncement_dates_company),
                                delimiter=",")  # reading data about companies and their anouncement
-companies_name = list(company_data[])  # list for company name
-anouncement_dates = list(company_data[])  # list for company anouncement date
-demo=list(company_data[])  # list for company Demo date
+companies_name = list(company_data["Company Name"])  # list for company name
+anouncement_dates = list(company_data["Ann date"])  # list for company anouncement date
+demo=list(company_data["Deal number"])  # list for company Demo date
 event = eventstudy()  # object for eventstudy class
 for company_number in range(len(companies_name)):  # running for each company
     company_name = companies_name[company_number]  # for company
+    if not data.columns.tolist().__contains__(company_name):
+        print('Company name',company_name, 'not in',datafile)
+        continue
     temp = anouncement_dates[company_number]  # for company anouncement date
     demo_number=demo[company_number]
     temp1=event.date_reducer(temp)
